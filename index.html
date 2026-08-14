@@ -334,4 +334,384 @@
             distance *
             0.72;
 
-        bright
+        brightPositions[i3 + 2] =
+            (Math.random() - 0.5) *
+            distance;
+    }
+
+    brightGeo.setAttribute(
+        'position',
+        new THREE.BufferAttribute(
+            brightPositions,
+            3
+        )
+    );
+
+    const brightMaterial =
+        new THREE.PointsMaterial({
+            color: 0x66eaff,
+            size: 0.065,
+            transparent: true,
+            opacity: 0.85
+        });
+
+    const brightParticles =
+        new THREE.Points(
+            brightGeo,
+            brightMaterial
+        );
+
+    coreGroup.add(
+        brightParticles
+    );
+
+
+    // =========================================================
+    // ADD TO SCENE
+    // =========================================================
+
+    scene.add(
+        coreGroup
+    );
+
+    camera.position.z = 7;
+
+
+    // =========================================================
+    // COLOR SYSTEM
+    // =========================================================
+
+    function setCoreColor(color) {
+
+        const c =
+            new THREE.Color(color);
+
+        coreMat.color.set(c);
+
+        haloMat.color.set(c);
+
+        orbitMaterial.color.set(c);
+
+        particlesMaterial.color.set(c);
+
+        brightMaterial.color.set(c);
+
+        document.getElementById(
+            "hud"
+        ).style.color =
+            "#" + c.getHexString();
+    }
+
+
+    // =========================================================
+    // TINKLE COLOR COMMAND
+    // =========================================================
+
+    window.changeTinkleColor =
+        function(command) {
+
+            if (!command)
+                return;
+
+            command =
+                command.toLowerCase();
+
+
+            if (
+                command.includes("red") ||
+                command.includes("أحمر") ||
+                command.includes("احمر")
+            ) {
+                setCoreColor(
+                    0xff2020
+                );
+            }
+
+            else if (
+                command.includes("blue") ||
+                command.includes("أزرق") ||
+                command.includes("ازرق")
+            ) {
+                setCoreColor(
+                    0x00cfff
+                );
+            }
+
+            else if (
+                command.includes("green") ||
+                command.includes("أخضر") ||
+                command.includes("اخضر")
+            ) {
+                setCoreColor(
+                    0x00ff66
+                );
+            }
+
+            else if (
+                command.includes("purple") ||
+                command.includes("بنفسجي")
+            ) {
+                setCoreColor(
+                    0xaa44ff
+                );
+            }
+
+            else if (
+                command.includes("pink") ||
+                command.includes("وردي")
+            ) {
+                setCoreColor(
+                    0xff3399
+                );
+            }
+
+            else if (
+                command.includes("gold") ||
+                command.includes("ذهبي")
+            ) {
+                setCoreColor(
+                    0xffaa00
+                );
+            }
+
+            else if (
+                command.includes("orange") ||
+                command.includes("برتقالي")
+            ) {
+                setCoreColor(
+                    0xff6600
+                );
+            }
+
+            else if (
+                command.includes("white") ||
+                command.includes("أبيض") ||
+                command.includes("ابيض")
+            ) {
+                setCoreColor(
+                    0xffffff
+                );
+            }
+
+            else if (
+                command.includes("cyan") ||
+                command.includes("سماوي")
+            ) {
+                setCoreColor(
+                    0x00ffff
+                );
+            }
+        };
+
+
+    // =========================================================
+    // EXTERNAL COMMAND SUPPORT
+    // =========================================================
+
+    window.addEventListener(
+        "message",
+        function(event) {
+
+            if (!event.data)
+                return;
+
+            if (
+                event.data.type ===
+                "tinkle-color"
+            ) {
+
+                window.changeTinkleColor(
+                    event.data.color
+                );
+            }
+
+            if (
+                event.data.type ===
+                "tinkle-command"
+            ) {
+
+                window.changeTinkleColor(
+                    event.data.command
+                );
+            }
+        }
+    );
+
+
+    // =========================================================
+    // MOUSE CONTROL
+    // =========================================================
+
+    let isDragging = false;
+
+    let prevMousePos = {
+        x: 0,
+        y: 0
+    };
+
+
+    window.addEventListener(
+        "mousedown",
+        (e) => {
+
+            isDragging = true;
+
+            prevMousePos = {
+                x: e.clientX,
+                y: e.clientY
+            };
+        }
+    );
+
+
+    window.addEventListener(
+        "mousemove",
+        (e) => {
+
+            if (!isDragging)
+                return;
+
+            coreGroup.rotation.y +=
+                (e.clientX -
+                    prevMousePos.x) *
+                0.005;
+
+            coreGroup.rotation.x +=
+                (e.clientY -
+                    prevMousePos.y) *
+                0.005;
+
+            prevMousePos = {
+                x: e.clientX,
+                y: e.clientY
+            };
+        }
+    );
+
+
+    window.addEventListener(
+        "mouseup",
+        () => {
+
+            isDragging = false;
+
+        }
+    );
+
+
+    // =========================================================
+    // TOUCH CONTROL
+    // =========================================================
+
+    window.addEventListener(
+        "touchstart",
+        (e) => {
+
+            isDragging = true;
+
+            prevMousePos = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+        }
+    );
+
+
+    window.addEventListener(
+        "touchmove",
+        (e) => {
+
+            if (!isDragging)
+                return;
+
+            coreGroup.rotation.y +=
+                (
+                    e.touches[0].clientX -
+                    prevMousePos.x
+                ) * 0.005;
+
+            coreGroup.rotation.x +=
+                (
+                    e.touches[0].clientY -
+                    prevMousePos.y
+                ) * 0.005;
+
+            prevMousePos = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+        }
+    );
+
+
+    window.addEventListener(
+        "touchend",
+        () => {
+
+            isDragging = false;
+
+        }
+    );
+
+
+    // =========================================================
+    // ANIMATION
+    // =========================================================
+
+    function animate() {
+
+        requestAnimationFrame(
+            animate
+        );
+
+        if (!isDragging) {
+
+            coreGroup.rotation.y +=
+                0.004;
+
+            coreGroup.rotation.z +=
+                0.001;
+        }
+
+        if (orbits[0])
+            orbits[0].rotation.z -=
+                0.01;
+
+        if (orbits[1])
+            orbits[1].rotation.z +=
+                0.015;
+
+        renderer.render(
+            scene,
+            camera
+        );
+    }
+
+    animate();
+
+
+    // =========================================================
+    // RESIZE
+    // =========================================================
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            camera.aspect =
+                window.innerWidth /
+                window.innerHeight;
+
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(
+                window.innerWidth,
+                window.innerHeight
+            );
+        }
+    );
+
+</script>
+
+</body>
+</html>
