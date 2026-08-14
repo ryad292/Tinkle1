@@ -1,8 +1,7 @@
 import time
 import pyttsx3
 import speech_recognition as sr
-import os
-from skills import execute_command
+from skills import TinkleSkills
 
 # تهيئة محرك الصوت
 engine = pyttsx3.init()
@@ -36,7 +35,7 @@ def active_mode():
             audio = recognizer.listen(source, timeout=6, phrase_time_limit=5)
             command = recognizer.recognize_google(audio, language="en-US")
             print(f"Command received: {command}")
-            execute_command(command, speak)
+            TinkleSkills.execute(command, speak)
         except Exception as e:
             speak("I didn't catch that, doctor.")
 
