@@ -2,4 +2,8 @@ pyttsx3
 SpeechRecognition
 pyaudio
 pyautogui
+opencv-python
+pillow
 requests
+pyperclip
+psutil
