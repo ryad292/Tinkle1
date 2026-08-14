@@ -1,132 +1,162 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>Tinkle AI - Advanced JARVIS Hologram</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #010308;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        #hud {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            text-align: center;
-            color: #ffaa00;
-            font-size: 20px;
-            letter-spacing: 5px;
-            text-shadow: 0 0 20px rgba(255, 170, 0, 0.9);
-            pointer-events: none;
-            text-transform: uppercase;
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-</head>
-<body>
-
-    <div id="hud">TINKLE - CORE INTELLECT ACTIVE - YES, DOCTOR</div>
-
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const coreGroup = new THREE.Group();
-
-        // 1. الطبقة الداخلية: نواة مضيئة متوهجة
-        const coreGeo = new THREE.SphereGeometry(1.5, 16, 16);
-        const coreMat = new THREE.MeshBasicMaterial({ color: 0xffcc00, wireframe: true, transparent: true, opacity: 0.8 });
+// 1. الطبقة الداخلية: نواة ذهبية كثيفة
+        const coreGeo = new THREE.SphereGeometry(1.35, 32, 32);
+        const coreMat = new THREE.MeshBasicMaterial({
+            color: 0xffa000,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.9
+        });
         const coreSphere = new THREE.Mesh(coreGeo, coreMat);
         coreGroup.add(coreSphere);
 
-        // 2. الطبقة الوسطى: شبكة الكرات المعقدة المتداخلة (تعطي كثافة جارفيس)
-        const denseGeo = new THREE.IcosahedronGeometry(2.8, 3);
-        const denseMat = new THREE.MeshBasicMaterial({ color: 0xff8800, wireframe: true, transparent: true, opacity: 0.25 });
-        const denseSphere = new THREE.Mesh(denseGeo, denseMat);
-        coreGroup.add(denseSphere);
+        // 2. طبقات شبكية كروية متداخلة لإعطاء شكل النواة التقنية
+        const shell1Geo = new THREE.IcosahedronGeometry(2.35, 4);
+        const shell1Mat = new THREE.MeshBasicMaterial({
+            color: 0xff8c00,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.42
+        });
+        const shell1 = new THREE.Mesh(shell1Geo, shell1Mat);
+        coreGroup.add(shell1);
 
-        // 3. طبقة الجسيمات والنقاط الضوئية العشوائية المحيطة
-        const particlesCount = 1000;
+        const shell2Geo = new THREE.IcosahedronGeometry(3.05, 3);
+        const shell2Mat = new THREE.MeshBasicMaterial({
+            color: 0xffa000,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.28
+        });
+        const shell2 = new THREE.Mesh(shell2Geo, shell2Mat);
+        shell2.rotation.x = Math.PI * 0.18;
+        shell2.rotation.z = Math.PI * 0.12;
+        coreGroup.add(shell2);
+
+        // 3. جسيمات ذهبية كثيفة حول النواة
+        const particlesCount = 2200;
         const particlesGeo = new THREE.BufferGeometry();
         const positions = new Float32Array(particlesCount * 3);
 
-        for(let i = 0; i < particlesCount * 3; i += 3) {
-            const u = Math.random();
-            const v = Math.random();
-            const theta = u * 2.0 * Math.PI;
-            const phi = Math.acos(2.0 * v - 1.0);
-            const r = 3.2 + Math.random() * 1.2; // توزيع النقاط بشكل كروي عميق
+        for (let i = 0; i < particlesCount * 3; i += 3) {
 
-            positions[i] = r * Math.sin(phi) * Math.cos(theta);
-            positions[i+1] = r * Math.sin(phi) * Math.sin(theta);
-            positions[i+2] = r * Math.cos(phi);
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+
+            // توزيع كثيف على سطح الكرة مع اختلافات عشوائية
+            const r =
+                2.0 +
+                Math.random() * 1.8 +
+                Math.sin(theta * 7.0) * 0.12;
+
+            positions[i] =
+                r * Math.sin(phi) * Math.cos(theta);
+
+            positions[i + 1] =
+                r * Math.sin(phi) * Math.sin(theta);
+
+            positions[i + 2] =
+                r * Math.cos(phi);
         }
 
-        particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particlesMat = new THREE.PointsMaterial({ color: 0xffaa00, size: 0.05, transparent: true, opacity: 0.7 });
-        const particleSystem = new THREE.Points(particlesGeo, particlesMat);
+        particlesGeo.setAttribute(
+            'position',
+            new THREE.BufferAttribute(positions, 3)
+        );
+
+        const particlesMat = new THREE.PointsMaterial({
+            color: 0xffa000,
+            size: 0.065,
+            transparent: true,
+            opacity: 0.85
+        });
+
+        const particleSystem =
+            new THREE.Points(particlesGeo, particlesMat);
+
         coreGroup.add(particleSystem);
 
-        // 4. الحلقات التقنية الخارجية الدائرة بعكس الاتجاه
-        const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide, wireframe: true, transparent: true, opacity: 0.6 });
-        const ring1 = new THREE.Mesh(new THREE.RingGeometry(3.8, 4.0, 64), ringMat1);
-        ring1.rotation.x = Math.PI / 3;
+        // 4. حلقات تقنية متعددة حول النواة
+        const ringMat1 = new THREE.MeshBasicMaterial({
+            color: 0xffa000,
+            side: THREE.DoubleSide,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.65
+        });
+
+        const ring1 = new THREE.Mesh(
+            new THREE.RingGeometry(3.15, 3.32, 96),
+            ringMat1
+        );
+
+        ring1.rotation.x = Math.PI / 2.7;
         coreGroup.add(ring1);
 
-        const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x00ffff, side: THREE.DoubleSide, wireframe: true, transparent: true, opacity: 0.5 });
-        const ring2 = new THREE.Mesh(new THREE.RingGeometry(4.3, 4.45, 64), ringMat2);
-        ring2.rotation.y = Math.PI / 4;
+        const ring2 = new THREE.Mesh(
+            new THREE.RingGeometry(3.55, 3.68, 96),
+            ringMat1
+        );
+
+        ring2.rotation.y = Math.PI / 3;
         coreGroup.add(ring2);
 
-        scene.add(coreGroup);
-        camera.position.z = 7;
+        const ring3 = new THREE.Mesh(
+            new THREE.RingGeometry(3.9, 4.02, 96),
+            ringMat1
+        );
 
-        // التفاعل مع الماوس أو اللمس لتدوير المجسم بسلاسة
-        let isDragging = false;
-        let prevMousePos = { x: 0, y: 0 };
+        ring3.rotation.x = Math.PI / 2.2;
+        ring3.rotation.z = Math.PI / 5;
+        coreGroup.add(ring3);
 
-        window.addEventListener('mousedown', (e) => { isDragging = true; prevMousePos = { x: e.clientX, y: e.clientY }; });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            coreGroup.rotation.y += (e.clientX - prevMousePos.x) * 0.005;
-            coreGroup.rotation.x += (e.clientY - prevMousePos.y) * 0.005;
-            prevMousePos = { x: e.clientX, y: e.clientY };
+        // حلقات داخلية أصغر لزيادة كثافة شكل النواة
+        const innerRing1 = new THREE.Mesh(
+            new THREE.RingGeometry(1.65, 1.72, 80),
+            ringMat1
+        );
+
+        innerRing1.rotation.x = Math.PI / 2;
+        coreGroup.add(innerRing1);
+
+        const innerRing2 = new THREE.Mesh(
+            new THREE.RingGeometry(2.0, 2.08, 80),
+            ringMat1
+        );
+
+        innerRing2.rotation.y = Math.PI / 3;
+        coreGroup.add(innerRing2);
+
+        // خطوط/مدارات ذهبية إضافية تعطي الشكل العشوائي التقني
+        const orbitMat = new THREE.LineBasicMaterial({
+            color: 0xff8800,
+            transparent: true,
+            opacity: 0.55
         });
-        window.addEventListener('mouseup', () => { isDragging = false; });
 
-        // دعم اللمس للـ ChromeOS
-        window.addEventListener('touchstart', (e) => { isDragging = true; prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            coreGroup.rotation.y += (e.touches[0].clientX - prevMousePos.x) * 0.005;
-            coreGroup.rotation.x += (e.touches[0].clientY - prevMousePos.y) * 0.005;
-            prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        });
-        window.addEventListener('touchend', () => { isDragging = false; });
+        for (let i = 0; i < 14; i++) {
 
-        // حركة دوران متقدمة ومتعددة الاتجاهات تشبه الحقيقة
-        function animate() {
-            requestAnimationFrame(animate);
-            if (!isDragging) {
-                coreGroup.rotation.y += 0.004;
-                coreGroup.rotation.z += 0.001;
-            }
-            ring1.rotation.z -= 0.01;
-            ring2.rotation.z += 0.015;
-            renderer.render(scene, camera);
+            const radius = 2.4 + Math.random() * 1.4;
+
+            const curve = new THREE.EllipseCurve(
+                0, 0,
+                radius,
+                radius * (0.45 + Math.random() * 0.45),
+                0,
+                Math.PI * 2,
+                false,
+                Math.random() * Math.PI
+            );
+
+            const points = curve.getPoints(80);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            const orbit = new THREE.Line(geometry, orbitMat);
+
+            orbit.rotation.x = Math.random() * Math.PI;
+            orbit.rotation.y = Math.random() * Math.PI;
+            orbit.rotation.z = Math.random() * Math.PI;
+
+            coreGroup.add(orbit);
         }
-        animate();
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
+        scene.add(coreGroup);
