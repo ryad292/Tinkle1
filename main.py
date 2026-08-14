@@ -1,6 +1,8 @@
 import time
 import pyttsx3
 import speech_recognition as sr
+import os
+from skills import execute_command
 
 # تهيئة محرك الصوت
 engine = pyttsx3.init()
@@ -27,7 +29,16 @@ def listen_for_trigger():
             pass
 
 def active_mode():
-    speak("I am ready for your command, doctor.")
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        speak("I am listening for your command, doctor.")
+        try:
+            audio = recognizer.listen(source, timeout=6, phrase_time_limit=5)
+            command = recognizer.recognize_google(audio, language="en-US")
+            print(f"Command received: {command}")
+            execute_command(command, speak)
+        except Exception as e:
+            speak("I didn't catch that, doctor.")
 
 if __name__ == "__main__":
     speak("Tinkle system initialized.")
