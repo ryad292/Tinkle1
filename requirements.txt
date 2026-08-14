@@ -1,9 +1,5 @@
-pyttsx3
-SpeechRecognition
-pyaudio
-pyautogui
-opencv-python
-pillow
-requests
-pyperclip
-psutil
+flask==3.0.3
+flask-socketio==5.3.6
+requests==2.31.0
+pyautogui==0.9.54
+pyttsx3==2.90
