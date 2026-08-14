@@ -2,76 +2,95 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Tinkle AI - JARVIS Core Interface</title>
+    <title>Tinkle AI - Holographic JARVIS</title>
     <style>
         body {
-            background-color: #050b14;
-            color: #00ffcc;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
             overflow: hidden;
+            background-color: #02050a;
+            font-family: 'Courier New', Courier, monospace;
         }
-        .jarvis-circle {
-            width: 280px;
-            height: 280px;
-            border: 4px dashed #00ffcc;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: rotate 12s linear infinite;
-            box-shadow: 0 0 40px rgba(0, 255, 204, 0.4);
-            transition: all 0.5s ease;
-        }
-        .inner-core {
-            width: 200px;
-            height: 200px;
-            border: 2px solid #00ffcc;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: pulse 2s infinite;
-            transition: all 0.5s ease;
-        }
-        .status-text {
-            margin-top: 30px;
-            font-size: 20px;
-            letter-spacing: 3px;
+        #hud {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            color: #ffaa00;
+            font-size: 22px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
+            pointer-events: none;
             text-transform: uppercase;
         }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
     </style>
+    <!-- مكتبة الرسوم الثلاثية الأبعاد الجاهزة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <div class="jarvis-circle" id="outerCircle">
-        <div class="inner-core" id="innerCore">
-            <span>TINKLE AI</span>
-        </div>
-    </div>
-    
-    <div class="status-text" id="statusText">System Initialized - Yes, Doctor.</div>
+    <div id="hud">TINKLE SYSTEM INITIALIZED - YES, DOCTOR</div>
 
     <script>
-        function changeInterfaceColor(colorCode) {
-            document.getElementById('outerCircle').style.borderColor = colorCode;
-            document.getElementById('outerCircle').style.boxShadow = `0 0 40px ${colorCode}`;
-            document.getElementById('innerCore').style.borderColor = colorCode;
-            document.body.style.color = colorCode;
+        // إعداد المشهد الثلاثي الأبعاد لجارفيس
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // إنشاء المجسم الكروي الهولوغرامي المتداخل
+        const group = new THREE.Group();
+        
+        // الكرة الخارجية المعقدة
+        const geometry = new THREE.SphereGeometry(3, 32, 32);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xffaa00,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.35
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        group.add(sphere);
+
+        // الحلقات الداخلية الدائرية المتداخلة
+        const ringGeo1 = new THREE.RingGeometry(3.5, 3.7, 64);
+        const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide, wireframe: true });
+        const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+        ring1.rotation.x = Math.PI / 2;
+        group.add(ring1);
+
+        const ringGeo2 = new THREE.RingGeometry(4, 4.1, 64);
+        const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x00ffff, side: THREE.DoubleSide, wireframe: true });
+        const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+        ring2.rotation.y = Math.PI / 3;
+        group.add(ring2);
+
+        scene.add(group);
+        camera.position.z = 7;
+
+        // حركة دوران المجسم باستمرار ليعطي مظهر جارفيس الحقيقي
+        function animate() {
+            requestAnimationFrame(animate);
+            group.rotation.x += 0.005;
+            group.rotation.y += 0.008;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // دعم تغير الأبعاد عند تغيير حجم الشاشة
+        window.addEventListener('window', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // دالة لتغيير لون الواجهة حسب الأوامر (مثل تحويلها للأزرق أو الذهبي)
+        function changeHologramColor(hexColor) {
+            const col = new THREE.Color(hexColor);
+            material.color = col;
+            ringMat1.color = col;
+            document.getElementById('hud').style.color = hexColor;
+            document.getElementById('hud').style.textShadow = `0 0 15px ${hexColor}`;
         }
     </script>
 </body>
