@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Tinkle AI - Dynamic Color Hologram</title>
+    <title>Tinkle AI - Glowing Hologram</title>
     <style>
         body {
             margin: 0;
@@ -32,7 +32,7 @@
     <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
@@ -78,7 +78,6 @@
         ring2.rotation.z = Math.PI * 0.28;
         coreGroup.add(ring2);
 
-        const extraOrbits = [];
         for (let i = 0; i < 5; i++) {
             const radius = 1.45 + Math.random() * 0.9;
             const orbitGeo = new THREE.RingGeometry(radius, radius + 0.025, 128);
@@ -87,11 +86,27 @@
             orbit.rotation.y = Math.random() * Math.PI;
             orbit.rotation.z = Math.random() * Math.PI;
             coreGroup.add(orbit);
-            extraOrbits.push(orbit);
         }
 
-        // 4. جسيمات صغيرة تتحرك حول النواة
-        const particlesCount = 1800;
+        // دالة مساعدة لإنشاء دوائر صغيرة ناعمة بدلاً من المربعات الخشنة
+        function createParticleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.5, 'rgba(0,223,255,0.8)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 32, 32);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const particleTexture = createParticleTexture();
+
+        // 4. جسيمات ناعمة تتحرك حول النواة
+        const particlesCount = 1500;
         const particlesGeo = new THREE.BufferGeometry();
         const positions = new Float32Array(particlesCount * 3);
 
@@ -108,15 +123,18 @@
         particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         const particlesMat = new THREE.PointsMaterial({
             color: 0x00dfff,
-            size: 0.045,
+            size: 0.1,
+            map: particleTexture,
             transparent: true,
-            opacity: 0.7
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
         });
         const particleSystem = new THREE.Points(particlesGeo, particlesMat);
         coreGroup.add(particleSystem);
 
-        // 5. جسيمات صغيرة إضافية متناثرة حول الكرة
-        const outerCount = 700;
+        // 5. جسيمات خارجية متناثرة
+        const outerCount = 600;
         const outerGeo = new THREE.BufferGeometry();
         const outerPositions = new Float32Array(outerCount * 3);
 
@@ -132,9 +150,12 @@
         outerGeo.setAttribute('position', new THREE.BufferAttribute(outerPositions, 3));
         const outerMat = new THREE.PointsMaterial({
             color: 0x00bfff,
-            size: 0.035,
+            size: 0.08,
+            map: particleTexture,
             transparent: true,
-            opacity: 0.55
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
         });
         const outerParticles = new THREE.Points(outerGeo, outerMat);
         coreGroup.add(outerParticles);
@@ -142,7 +163,7 @@
         scene.add(coreGroup);
         camera.position.z = 5;
 
-        // دالة تغيير اللون ديناميكياً (تستقبل كود اللون مثل 0xffaa00 أو '#ff0000')
+        // دالة تغيير اللون ديناميكياً
         window.changeHologramColor = function(hexColor) {
             const newColor = new THREE.Color(hexColor);
             glowMat.color = newColor;
@@ -150,7 +171,6 @@
             particlesMat.color = newColor;
             outerMat.color = newColor;
             
-            // تغيير لون نصوص الـ HUD ليطابق لون الهولوغرام
             document.getElementById('hud').style.color = '#' + newColor.getHexString();
             document.getElementById('hud').style.textShadow = '0 0 20px #' + newColor.getHexString();
         };
