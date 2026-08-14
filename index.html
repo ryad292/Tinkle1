@@ -2,7 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Tinkle AI - Streak Particle Hologram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tinkle AI - Dynamic Core</title>
+
     <style>
         body {
             margin: 0;
@@ -10,6 +13,7 @@
             background-color: #010308;
             font-family: 'Courier New', Courier, monospace;
         }
+
         #hud {
             position: absolute;
             bottom: 30px;
@@ -18,161 +22,316 @@
             color: #00dfff;
             font-size: 20px;
             letter-spacing: 5px;
-            text-shadow: 0 0 20px rgba(0, 223, 255, 0.8);
+            text-shadow: 0 0 20px rgba(0, 220, 255, 0.9);
             pointer-events: none;
             text-transform: uppercase;
         }
     </style>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
+
 <body>
 
-    <div id="hud">TINKLE STREAK CORE - YES, DOCTOR</div>
+<div id="hud">
+    TINKLE DYNAMIC CORE - YES, DOCTOR
+</div>
 
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+<script>
 
-        const coreGroup = new THREE.Group();
+    // =========================================================
+    // SCENE
+    // =========================================================
 
-        // 1. النواة المضيئة في المنتصف
-        const coreGeo = new THREE.SphereGeometry(0.55, 32, 32);
-        const coreMat = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 1.0
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    document.body.appendChild(
+        renderer.domElement
+    );
+
+
+    const coreGroup = new THREE.Group();
+
+
+    // =========================================================
+    // CORE
+    // =========================================================
+
+    const coreGeo =
+        new THREE.SphereGeometry(
+            0.42,
+            32,
+            32
+        );
+
+    const coreMat =
+        new THREE.MeshBasicMaterial({
+            color: 0xffffff
         });
-        const coreSphere = new THREE.Mesh(coreGeo, coreMat);
-        coreGroup.add(coreSphere);
 
-        // 2. هالة مضيئة حول النواة
-        const glowGeo = new THREE.SphereGeometry(0.85, 32, 32);
-        const glowMat = new THREE.MeshBasicMaterial({
-            color: 0x00dfff,
+    const coreSphere =
+        new THREE.Mesh(
+            coreGeo,
+            coreMat
+        );
+
+    coreGroup.add(
+        coreSphere
+    );
+
+
+    // =========================================================
+    // HALO
+    // =========================================================
+
+    const haloGeo =
+        new THREE.SphereGeometry(
+            0.68,
+            32,
+            32
+        );
+
+    const haloMat =
+        new THREE.MeshBasicMaterial({
+            color: 0x00cfff,
+            wireframe: true,
             transparent: true,
-            opacity: 0.16,
-            wireframe: true
+            opacity: 0.22
         });
-        const glowSphere = new THREE.Mesh(glowGeo, glowMat);
-        coreGroup.add(glowSphere);
 
-        // 3. مدارات الطاقة السماوية
-        const orbitMat = new THREE.LineBasicMaterial({
-            color: 0x00dfff,
+    const halo =
+        new THREE.Mesh(
+            haloGeo,
+            haloMat
+        );
+
+    coreGroup.add(
+        halo
+    );
+
+
+    // =========================================================
+    // ORBITS
+    // =========================================================
+
+    const orbitMaterial =
+        new THREE.LineBasicMaterial({
+            color: 0x00cfff,
             transparent: true,
             opacity: 0.42
         });
 
-        const orbitGeo1 = new THREE.RingGeometry(1.4, 1.43, 128);
-        const ring1 = new THREE.Mesh(orbitGeo1, orbitMat);
-        ring1.rotation.x = Math.PI * 0.48;
-        ring1.rotation.y = Math.PI * 0.18;
-        coreGroup.add(ring1);
+    const orbits = [];
 
-        const orbitGeo2 = new THREE.RingGeometry(1.75, 1.78, 128);
-        const ring2 = new THREE.Mesh(orbitGeo2, orbitMat);
-        ring2.rotation.x = Math.PI * 0.72;
-        ring2.rotation.z = Math.PI * 0.28;
-        coreGroup.add(ring2);
+    for (let i = 0; i < 7; i++) {
 
-        for (let i = 0; i < 5; i++) {
-            const radius = 1.45 + Math.random() * 0.9;
-            const orbitGeo = new THREE.RingGeometry(radius, radius + 0.025, 128);
-            const orbit = new THREE.Mesh(orbitGeo, orbitMat);
-            orbit.rotation.x = Math.random() * Math.PI;
-            orbit.rotation.y = Math.random() * Math.PI;
-            orbit.rotation.z = Math.random() * Math.PI;
-            coreGroup.add(orbit);
+        const points = [];
+
+        const radius =
+            1.25 +
+            Math.random() * 0.45;
+
+        const height =
+            0.55 +
+            Math.random() * 0.55;
+
+        for (let j = 0; j <= 160; j++) {
+
+            const t =
+                (j / 160) *
+                Math.PI *
+                2;
+
+            const x =
+                Math.cos(t) *
+                radius;
+
+            const y =
+                Math.sin(t) *
+                radius *
+                height;
+
+            const z =
+                Math.sin(t) *
+                radius *
+                0.35;
+
+            points.push(
+                new THREE.Vector3(
+                    x,
+                    y,
+                    z
+                )
+            );
         }
 
-        // 4. إنشاء الشرطات الضوئية المرتفعة (Streaks) المطابقة للصورة
-        const streakMaterials = [];
-        const streaksCount = 350; // عدد الشرطات الضوئية
+        const geometry =
+            new THREE.BufferGeometry()
+                .setFromPoints(points);
 
-        for (let i = 0; i < streaksCount; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 1.6 + Math.random() * 2.3;
-            const yPos = (Math.random() - 0.5) * 3.0;
+        const orbit =
+            new THREE.Line(
+                geometry,
+                orbitMaterial
+            );
 
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
+        orbit.rotation.x =
+            Math.random() * Math.PI;
 
-            // بناء خط قصير (شرطة ضوئية)
-            const points = [];
-            points.push(new THREE.Vector3(x, yPos, z));
-            // اتجاه وطول الشرطة بشكل مائل قليلاً
-            points.push(new THREE.Vector3(x + (Math.random() - 0.5) * 0.3, yPos + 0.2, z + (Math.random() - 0.5) * 0.3));
+        orbit.rotation.y =
+            Math.random() * Math.PI;
 
-            const streakGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const streakMat = new THREE.LineBasicMaterial({
-                color: 0x00dfff,
-                transparent: true,
-                opacity: 0.75
-            });
+        orbit.rotation.z =
+            Math.random() * Math.PI;
 
-            streakMaterials.push(streakMat);
-            const streakLine = new THREE.Line(streakGeo, streakMat);
-            coreGroup.add(streakLine);
-        }
+        coreGroup.add(
+            orbit
+        );
 
-        scene.add(coreGroup);
-        camera.position.z = 5;
+        orbits.push(
+            orbit
+        );
+    }
 
-        // دالة تغيير اللون ديناميكياً بالأوامر
-        window.changeHologramColor = function(hexColor) {
-            const newColor = new THREE.Color(hexColor);
-            glowMat.color = newColor;
-            orbitMat.color = newColor;
-            
-            // تحديث ألوان جميع الشرطات الضوئية
-            streakMaterials.forEach(mat => {
-                mat.color = newColor;
-            });
-            
-            document.getElementById('hud').style.color = '#' + newColor.getHexString();
-            document.getElementById('hud').style.textShadow = '0 0 20px #' + newColor.getHexString();
-        };
 
-        // تفاعل الماوس واللمس للتدوير
-        let isDragging = false;
-        let prevMousePos = { x: 0, y: 0 };
+    // =========================================================
+    // PARTICLES
+    // =========================================================
 
-        window.addEventListener('mousedown', (e) => { isDragging = true; prevMousePos = { x: e.clientX, y: e.clientY }; });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            coreGroup.rotation.y += (e.clientX - prevMousePos.x) * 0.005;
-            coreGroup.rotation.x += (e.clientY - prevMousePos.y) * 0.005;
-            prevMousePos = { x: e.clientX, y: e.clientY };
+    const particlesCount = 2600;
+
+    const particlesGeo =
+        new THREE.BufferGeometry();
+
+    const positions =
+        new Float32Array(
+            particlesCount * 3
+        );
+
+    for (
+        let i = 0;
+        i < particlesCount;
+        i++
+    ) {
+
+        const i3 = i * 3;
+
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+        const distance =
+            0.9 +
+            Math.pow(
+                Math.random(),
+                1.8
+            ) * 2.2;
+
+        const vertical =
+            (Math.random() - 0.5) *
+            distance *
+            0.75;
+
+        positions[i3] =
+            Math.cos(angle) *
+            distance +
+            (Math.random() - 0.5) *
+            0.22;
+
+        positions[i3 + 1] =
+            Math.sin(angle) *
+            distance *
+            0.72 +
+            vertical *
+            0.25;
+
+        positions[i3 + 2] =
+            vertical;
+    }
+
+    particlesGeo.setAttribute(
+        'position',
+        new THREE.BufferAttribute(
+            positions,
+            3
+        )
+    );
+
+    const particlesMaterial =
+        new THREE.PointsMaterial({
+            color: 0x00cfff,
+            size: 0.035,
+            transparent: true,
+            opacity: 0.72
         });
-        window.addEventListener('mouseup', () => { isDragging = false; });
 
-        window.addEventListener('touchstart', (e) => { isDragging = true; prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            coreGroup.rotation.y += (e.touches[0].clientX - prevMousePos.x) * 0.005;
-            coreGroup.rotation.x += (e.touches[0].clientY - prevMousePos.y) * 0.005;
-            prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        });
-        window.addEventListener('touchend', () => { isDragging = false; });
+    const particles =
+        new THREE.Points(
+            particlesGeo,
+            particlesMaterial
+        );
 
-        function animate() {
-            requestAnimationFrame(animate);
-            if (!isDragging) {
-                coreGroup.rotation.y += 0.004;
-                coreGroup.rotation.z += 0.001;
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
+    coreGroup.add(
+        particles
+    );
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
-</body>
-</html>
+
+    // =========================================================
+    // BRIGHT PARTICLES
+    // =========================================================
+
+    const brightCount = 350;
+
+    const brightGeo =
+        new THREE.BufferGeometry();
+
+    const brightPositions =
+        new Float32Array(
+            brightCount * 3
+        );
+
+    for (
+        let i = 0;
+        i < brightCount;
+        i++
+    ) {
+
+        const i3 = i * 3;
+
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+        const distance =
+            1.0 +
+            Math.random() *
+            2.0;
+
+        brightPositions[i3] =
+            Math.cos(angle) *
+            distance;
+
+        brightPositions[i3 + 1] =
+            Math.sin(angle) *
+            distance *
+            0.72;
+
+        bright
