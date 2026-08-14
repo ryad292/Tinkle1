@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Tinkle AI - Holographic JARVIS</title>
+    <title>Tinkle AI - Hand Tracking Hologram</title>
     <style>
         body {
             margin: 0;
@@ -21,77 +21,127 @@
             text-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
             pointer-events: none;
             text-transform: uppercase;
+            z-index: 10;
+        }
+        /* نافذة مصغرة للكاميرا في الزاوية للتأكد من عمل التتبع */
+        #webcam {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 160px;
+            height: 120px;
+            border: 2px solid #ffaa00;
+            border-radius: 10px;
+            transform: scaleX(-1);
+            opacity: 0.7;
+            z-index: 10;
         }
     </style>
-    <!-- مكتبة الرسوم الثلاثية الأبعاد الجاهزة -->
+    <!-- مكتبة الرسوم الثلاثية الأبعاد -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- مكتبات تتبع اليد من جوجل MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
-    <div id="hud">TINKLE SYSTEM INITIALIZED - YES, DOCTOR</div>
+    <div id="hud">TINKLE - HAND TRACKING ACTIVE - YES, DOCTOR</div>
+    <video id="webcam" autoplay playsinline></video>
 
     <script>
-        // إعداد المشهد الثلاثي الأبعاد لجارفيس
+        // إعداد المشهد ثلاثي الأبعاد
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // إنشاء المجسم الكروي الهولوغرامي المتداخل
+        // بناء المجسم الهولوغرامي الكروي
         const group = new THREE.Group();
         
-        // الكرة الخارجية المعقدة
         const geometry = new THREE.SphereGeometry(3, 32, 32);
         const material = new THREE.MeshBasicMaterial({
             color: 0xffaa00,
             wireframe: true,
             transparent: true,
-            opacity: 0.35
+            opacity: 0.4
         });
         const sphere = new THREE.Mesh(geometry, material);
         group.add(sphere);
 
-        // الحلقات الداخلية الدائرية المتداخلة
-        const ringGeo1 = new THREE.RingGeometry(3.5, 3.7, 64);
-        const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide, wireframe: true });
-        const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-        ring1.rotation.x = Math.PI / 2;
-        group.add(ring1);
-
-        const ringGeo2 = new THREE.RingGeometry(4, 4.1, 64);
-        const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x00ffff, side: THREE.DoubleSide, wireframe: true });
-        const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
-        ring2.rotation.y = Math.PI / 3;
-        group.add(ring2);
+        const ringGeo = new THREE.RingGeometry(3.5, 3.7, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, side: THREE.DoubleSide, wireframe: true });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        group.add(ring);
 
         scene.add(group);
         camera.position.z = 7;
 
-        // حركة دوران المجسم باستمرار ليعطي مظهر جارفيس الحقيقي
+        // متغيرات التحكم عبر اليد
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+
         function animate() {
             requestAnimationFrame(animate);
-            group.rotation.x += 0.005;
-            group.rotation.y += 0.008;
+            
+            // سلاسة الحركة بناءً على إحداثيات اليد
+            group.rotation.y += (targetRotationY - group.rotation.y) * 0.1;
+            group.rotation.x += (targetRotationX - group.rotation.x) * 0.1;
+            
+            // حركة دوران خفيفة افتراضية في حال عدم وجود اليد
+            if(targetRotationX === 0 && targetRotationY === 0) {
+                group.rotation.y += 0.005;
+            }
+
             renderer.render(scene, camera);
         }
         animate();
 
-        // دعم تغير الأبعاد عند تغيير حجم الشاشة
-        window.addEventListener('window', () => {
+        // إعداد كاميرا الويب وتتبع اليدين باستخدام MediaPipe
+        const videoElement = document.getElementById('webcam');
+
+        function onResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                // استخدام إحداثيات المعصم أو راحة اليد (النقطة 0 أو 9) لتدوير المجسم
+                const handX = landmarks[9].x; // القيمة بين 0 و 1
+                const handY = landmarks[9].y; // القيمة بين 0 و 1
+
+                // تحويل إحداثيات الشاشة إلى زوايا دوران للمجسم
+                targetRotationY = (handX - 0.5) * 5;
+                targetRotationX = (handY - 0.5) * 5;
+            }
+        }
+
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+        
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        
+        hands.onResults(onResults);
+
+        const camUtils = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({ image: videoElement });
+            },
+            width: 320,
+            height: 240
+        });
+        camUtils.start();
+
+        // التكيف مع حجم الشاشة
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // دالة لتغيير لون الواجهة حسب الأوامر (مثل تحويلها للأزرق أو الذهبي)
-        function changeHologramColor(hexColor) {
-            const col = new THREE.Color(hexColor);
-            material.color = col;
-            ringMat1.color = col;
-            document.getElementById('hud').style.color = hexColor;
-            document.getElementById('hud').style.textShadow = `0 0 15px ${hexColor}`;
-        }
     </script>
 </body>
 </html>
